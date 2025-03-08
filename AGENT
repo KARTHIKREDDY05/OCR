@@ -1,0 +1,61 @@
+from flask import Flask, render_template_string, request, redirect
+
+app = Flask(__name__)
+
+# Dummy Recipe Data
+recipes = [{"id": 1, "title": "Pasta", "desc": "Creamy Italian Pasta"},
+           {"id": 2, "title": "Chicken Curry", "desc": "Spicy and delicious!"}]
+
+# HTML + CSS + JS (Everything in One File)
+HTML = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abhinasreee's Recipe App</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f8f9fa; }
+        .container { width: 50%; margin: auto; padding: 20px; background: white; box-shadow: 0 0 10px gray; border-radius: 8px; }
+        .btn { padding: 8px 16px; border: none; cursor: pointer; border-radius: 4px; margin: 5px; }
+        .btn-add { background: green; color: white; }
+        .btn-del { background: red; color: white; }
+        input, textarea { width: 90%; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Abhinasreee's Recipe Sharing</h1>
+        <form method="POST">
+            <input type="text" name="title" placeholder="Recipe Title" required>
+            <textarea name="desc" placeholder="Recipe Description" required></textarea>
+            <button class="btn btn-add">Add Recipe</button>
+        </form>
+        <h2>Recipes</h2>
+        <ul>
+            {% for r in recipes %}
+                <li>{{ r.title }} - {{ r.desc }}
+                    <a href="/delete/{{ r.id }}"><button class="btn btn-del">Delete</button></a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
+"""
+
+@app.route("/", methods=["GET", "POST"])
+def home():
+    if request.method == "POST":
+        recipes.append({"id": len(recipes) + 1, "title": request.form["title"], "desc": request.form["desc"]})
+    return render_template_string(HTML, recipes=recipes)
+
+
+@app.route("/delete/<int:id>")
+def delete(id):
+    global recipes
+    recipes = [r for r in recipes if r["id"] != id]
+    return redirect("/")
+
+if __name__ == "__main__":
+    app.run(debug=True)
